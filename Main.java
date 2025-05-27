@@ -1,0 +1,97 @@
+import java.util.Scanner;
+
+public class Main {
+
+    // Main method
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("🧮 Welcome to Java Calculator (No Libraries)");
+        System.out.println("Type any expression (e.g. 2+3*4/2) or 'exit' to quit");
+
+        while (true) {
+            System.out.print("\nEnter expression: ");
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("exit")) break;
+
+            try {
+                double result = evaluate(input);
+                System.out.println("Result = " + result);
+            } catch (Exception e) {
+                System.out.println("❌ Invalid expression. Error: " + e.getMessage());
+            }
+        }
+
+        scanner.close();
+        System.out.println("👋 Calculator closed.");
+    }
+
+    // Expression evaluator
+    public static double evaluate(String expr) {
+        return new Object() {
+            int pos = -1, ch;
+
+            void nextChar() {
+                ch = (++pos < expr.length()) ? expr.charAt(pos) : -1;
+            }
+
+            boolean eat(int charToEat) {
+                while (ch == ' ') nextChar();
+                if (ch == charToEat) {
+                    nextChar();
+                    return true;
+                }
+                return false;
+            }
+
+            double parse() {
+                nextChar();
+                double x = parseExpression();
+                if (pos < expr.length()) throw new RuntimeException("Unexpected character: '" + (char) ch + "'");
+                return x;
+            }
+
+            // Grammar:
+            // expression = term | expression `+` term | expression `-` term
+            // term = factor | term `*` factor | term `/` factor
+            // factor = `+` factor | `-` factor | number | `(` expression `)`
+
+            double parseExpression() {
+                double x = parseTerm();
+                while (true) {
+                    if      (eat('+')) x += parseTerm(); // addition
+                    else if (eat('-')) x -= parseTerm(); // subtraction
+                    else return x;
+                }
+            }
+
+            double parseTerm() {
+                double x = parseFactor();
+                while (true) {
+                    if      (eat('*')) x *= parseFactor(); // multiplication
+                    else if (eat('/')) x /= parseFactor(); // division
+                    else return x;
+                }
+            }
+
+            double parseFactor() {
+                if (eat('+')) return parseFactor(); // unary plus
+                if (eat('-')) return -parseFactor(); // unary minus
+
+                double x;
+                int startPos = this.pos;
+                if (eat('(')) { // parentheses
+                    x = parseExpression();
+                    if (!eat(')')) throw new RuntimeException("Missing ')'");
+                } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
+                    while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
+                    x = Double.parseDouble(expr.substring(startPos, this.pos));
+                } else {
+                    throw new RuntimeException("Unexpected character: '" + (char) ch + "'");
+                }
+
+                return x;
+            }
+        }.parse();
+    }
+}
