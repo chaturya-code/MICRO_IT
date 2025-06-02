@@ -1,11 +1,11 @@
 import java.util.Scanner;
 
-public class Main {
+public class Main{
 
     // Main method
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("🧮 Welcome to Java Calculator (No Libraries)");
+        System.out.println("Welcome to Java Calculator");
         System.out.println("Type any expression (e.g. 2+3*4/2) or 'exit' to quit");
 
         while (true) {
@@ -18,7 +18,7 @@ public class Main {
                 double result = evaluate(input);
                 System.out.println("Result = " + result);
             } catch (Exception e) {
-                System.out.println("❌ Invalid expression. Error: " + e.getMessage());
+                System.out.println("Invalid expression. Error: " + e.getMessage());
             }
         }
 
